@@ -3,16 +3,12 @@ package me.jaehyun.restapi.events;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.jaehyun.restapi.common.RestDocsConfiguration;
 import me.jaehyun.restapi.common.TestDescription;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpHeaders;
@@ -84,14 +80,12 @@ public class EventControllerTests {
                 .andExpect(jsonPath("free").value(false))
                 .andExpect(jsonPath("offline").value(true))
                 .andExpect(jsonPath("eventStatus").value(EventStatus.DRAFT.name()))
-                .andExpect(jsonPath("_links.self").exists())
-                .andExpect(jsonPath("_links.query-events").exists())
-                .andExpect(jsonPath("_links.update-event").exists())
                 .andDo(document("create-event",
                         links(
                                 linkWithRel("self").description("link to self")
                                 , linkWithRel("query-events").description("link to query events")
                                 , linkWithRel("update-event").description("link to update an existing event")
+                                , linkWithRel("profile").description("link to profile")
                         ),
                         requestHeaders(
                                 headerWithName(HttpHeaders.ACCEPT).description("header accept")
@@ -131,6 +125,7 @@ public class EventControllerTests {
                                 , fieldWithPath("_links.self.href").description("link to self")
                                 , fieldWithPath("_links.query-events.href").description("link to query list")
                                 , fieldWithPath("_links.update-event.href").description("link to self update existing event")
+                                , fieldWithPath("_links.profile.href").description("link to self profile")
                         )
                 ));
     }
