@@ -1,6 +1,8 @@
 package me.jaehyun.restapi.events;
 
 import me.jaehyun.restapi.common.ErrorsResource;
+import org.apache.coyote.Response;
+import org.hibernate.hql.internal.ast.tree.ResolvableNode;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.Optional;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
@@ -77,6 +80,22 @@ public class EventController {
         pagedResources.add(new Link("/docs/index.html#resources-events-list").withRel("profile"));
         return ResponseEntity.ok(pagedResources);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity getEvent(@PathVariable Integer id) {
+        Optional<Event> optionalEvent = this.eventRepository.findById(id);
+        if (optionalEvent.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Event event = optionalEvent.get();
+        EventResource eventResource = new EventResource(event);
+        eventResource.add(new Link("/docs/index.html#resources-events-get").withRel("profile"));
+        return ResponseEntity.ok(eventResource);
+
+    }
+
+
 
     private ResponseEntity badRequest(Errors errors) {
         return ResponseEntity.badRequest().body(new ErrorsResource(errors));
