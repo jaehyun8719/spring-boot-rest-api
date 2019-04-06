@@ -1,8 +1,10 @@
 package me.jaehyun.restapi.config;
 
 import me.jaehyun.restapi.accounts.Account;
+import me.jaehyun.restapi.accounts.AccountRepository;
 import me.jaehyun.restapi.accounts.AccountRole;
 import me.jaehyun.restapi.accounts.AccountService;
+import me.jaehyun.restapi.common.AppProperties;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -44,21 +46,21 @@ public class AppConfig {
             @Autowired
             AccountService accountService;
 
+            @Autowired
+            AppProperties appProperties;
+
             @Override
             public void run(ApplicationArguments args) throws Exception {
-                String username = "jaehyun8719@gmail.com";
-                String password = "jaehyun";
-
                 Account admin = Account.builder()
-                        .email(username)
-                        .password(password)
+                        .email(appProperties.getAdminUsername())
+                        .password(appProperties.getAdminPassword())
                         .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
                         .build();
                 accountService.saveAccount(admin);
 
                 Account user = Account.builder()
-                        .email(username)
-                        .password(password)
+                        .email(appProperties.getUserUsername())
+                        .password(appProperties.getUserPassword())
                         .roles(Set.of(AccountRole.USER))
                         .build();
                 accountService.saveAccount(user);

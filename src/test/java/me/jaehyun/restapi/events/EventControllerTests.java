@@ -4,6 +4,7 @@ import me.jaehyun.restapi.accounts.Account;
 import me.jaehyun.restapi.accounts.AccountRepository;
 import me.jaehyun.restapi.accounts.AccountRole;
 import me.jaehyun.restapi.accounts.AccountService;
+import me.jaehyun.restapi.common.AppProperties;
 import me.jaehyun.restapi.common.BaseControllerTest;
 import me.jaehyun.restapi.common.TestDescription;
 import org.junit.Before;
@@ -50,6 +51,9 @@ public class EventControllerTests extends BaseControllerTest {
 
     @Autowired
     AccountRepository accountRepository;
+
+    @Autowired
+    AppProperties appProperties;
 
     @Before
     public void setUp() {
@@ -142,23 +146,18 @@ public class EventControllerTests extends BaseControllerTest {
 
     private String getAccessToken() throws Exception {
         //Given
-        String username = "jaehyun8719@gamil.com";
-        String password = "jaehyun";
         Account jaehyun = Account.builder()
-                .email(username)
-                .password(password)
+                .email(appProperties.getUserUsername())
+                .password(appProperties.getUserPassword())
                 .roles(Set.of(AccountRole.ADMIN, AccountRole.USER))
                 .build();
 
         this.accountService.saveAccount(jaehyun);
 
-        String clientId = "myApp";
-        String clientSecret = "pass";
-
         ResultActions perform = this.mockMvc.perform(post("/oauth/token")
-                .with(httpBasic(clientId, clientSecret))
-                .param("username", username)
-                .param("password", password)
+                .with(httpBasic(appProperties.getClientId(), appProperties.getClientSecret()))
+                .param("username", appProperties.getUserUsername())
+                .param("password", appProperties.getUserPassword())
                 .param("grant_type", "password"))
                 .andDo(print());
         var responseBody = perform.andReturn().getResponse().getContentAsString();
@@ -262,13 +261,14 @@ public class EventControllerTests extends BaseControllerTest {
         Event event = this.generateEvent(100);
 
         // When & Then
-        this.mockMvc.perform(get("/api/events/{id}", event.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("name").exists())
-                .andExpect(jsonPath("id").exists())
-                .andExpect(jsonPath("_links.self").exists())
-                .andExpect(jsonPath("_links.profile").exists())
-                .andDo(document("get-an-event"));
+        this.mockMvc.perform(get("/api/events/{id}", event.getId())
+                        .header(HttpHeaders.AUTHORIZATION, getBearerToken()))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("name").exists())
+                    .andExpect(jsonPath("id").exists())
+                    .andExpect(jsonPath("_links.self").exists())
+                    .andExpect(jsonPath("_links.profile").exists())
+                    .andDo(document("get-an-event"));
     }
 
     @Test
@@ -277,7 +277,8 @@ public class EventControllerTests extends BaseControllerTest {
         // Given
 
         // When & Then
-        this.mockMvc.perform(get("/api/events/12312"))
+        this.mockMvc.perform(get("/api/events/12312")
+                        .header(HttpHeaders.AUTHORIZATION, getBearerToken()))
                     .andExpect(status().isNotFound());
     }
 
