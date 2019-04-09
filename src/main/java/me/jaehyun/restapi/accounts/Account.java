@@ -25,6 +25,7 @@ public class Account {
     @Id @GeneratedValue
     private Integer Id;
 
+    @Column(unique = true)
     private String email;
 
     private String password;
@@ -32,4 +33,5 @@ public class Account {
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     private Set<AccountRole> roles;
+
 }
